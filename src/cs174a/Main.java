@@ -34,7 +34,8 @@ public class Main
             // Example tests.  We'll overwrite your Main.main() function with our final tests.
             //r = app.createTables();
             //System.out.println( r );
-            app.setDate(1998,07,26);
+            //app.setDate(1998,07,26);
+            app.createCheckingSavingsAccount(AccountType.INTEREST_CHECKING,"1276",1200.39, "432", "Lizard", "404 goodplace");
             // Another example test.
             //r = app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "account1", 1234.56, "theTaxID", "Im YoungMing", "Known" );
         }

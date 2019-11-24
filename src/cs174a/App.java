@@ -218,6 +218,69 @@ public class App implements Testable
 
     }
 
+    public String createCheckingSavingsAccount( AccountType accountType, String id, double initialBalance, String tin, String name, String address )
+    {
+        // check if initial balance is going to be enough
+        if(initialBalance<1000)
+            return "1 ";
+        //1. check if Customer with taxid = tin exists in  Customer table
+        String checkCustomer = "SELECT C.taxid FROM Customer C WHERE C.taxid = ?";
+        try (PreparedStatement statement = _connection.prepareStatement(checkCustomer)) {
+            statement.setString(1,tin);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                if(!resultSet.next()) {
+                    String createCustomer = "INSERT INTO Customer (name, taxid, address, PIN)"+
+                            "VALUES(?,?,?,1234)";
+                    try(PreparedStatement s = _connection.prepareStatement(createCustomer)) {
+                        s.setString(1, name);
+                        s.setString(2, tin);
+                        s.setString(3, address);
+                        s.executeUpdate();
+                    }
+                }
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+            return "1";
+        }
+        //2. if customer with taxid =tin deos not exist, then call this.createCustomer(id,tin, name, address)
+        //3. insert into transaction_performed the deposit of intial balance
 
+
+        String createAccount = "INSERT INTO Account_Owns(aid, branch, acc_type, balance, interest_rate, interest, taxid)"+
+                "VALUES(?, ?, ?, ?, ?, 0, ? )";
+        try(PreparedStatement statement = _connection.prepareStatement(createAccount)){
+
+            statement.setString(1,id);
+            statement.setString(2,"Isla Vista");
+            statement.setString(3,accountType.name());
+            statement.setDouble(4, initialBalance);
+            statement.setString(6, tin);
+            if(accountType.equals("INTEREST_CHECKING")){
+                statement.setDouble(5,3.0);
+            }
+            else if (accountType.equals("SAVINGS")){
+                statement.setDouble(5, 4.8);
+            }
+            else{
+                statement.setDouble(5,0.0);
+            }
+            statement.executeUpdate();
+            return "0 " + id + " " + accountType + " " + initialBalance + " " + tin;
+        }
+        catch( SQLException e )
+        {
+            System.err.println( e.getMessage() );
+            return "1 ";
+        }
+    }
+    public String createCustomer( String accountId, String tin, String name, String address ){
+        //check that entry with aid=accountId exists in Account_Owns
+        //1. check if there is an enry in Account_Owns where taxid=tin and aid=accountID
+        //2. if there is not, make an entry in Customer(name, ttin, address, 0)
+        //3. then make an entry into Co_owns(accountId, tin)
+        return "0";
+    }
 
 }
