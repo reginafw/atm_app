@@ -201,19 +201,19 @@ public class App implements Testable
             }
         } catch( SQLException e){
             System.err.println( e.getMessage() );
-            return "1";
+            return "1 "+year+"-"+month+ "-" + day;
         }
         String insertDate = "INSERT INTO Current_Date (cdate) VALUES(?)";
         LocalDate currentDate = LocalDate.of(year,month, day);
         try (PreparedStatement statement = _connection.prepareStatement(insertDate)) {
             statement.setDate(1,java.sql.Date.valueOf(currentDate));
             statement.executeUpdate();
-            return "r yyyy-mm-dd";
+            return "0 "+year+"-"+month+ "-" + day;
         }
         catch( SQLException e )
         {
             System.err.println( e.getMessage() );
-            return "1";
+            return "1 "+year+"-"+month+ "-" + day;
         }
 
     }
