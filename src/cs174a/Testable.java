@@ -66,7 +66,7 @@ interface Testable
      *         balance is the account's initial balance with 2 decimal places (e.g. 1000.34, as with %.2f); and
      *         tin is the Tax ID of account's primary owner.
      */
-    //String createCheckingSavingsAccount( AccountType accountType, String id, double initialBalance, String tin, String name, String address );
+    String createCheckingSavingsAccount( AccountType accountType, String id, double initialBalance, String tin, String name, String address );
 
     /**
      * Create a new pocket account.
@@ -91,7 +91,7 @@ interface Testable
      * @param address New customer's address.
      * @return a string "r", where r = 0 for success, 1 for error.
      */
-    //String createCustomer( String accountId, String tin, String name, String address );
+    String createCustomer( String accountId, String tin, String name, String address );
 
     /**
      * Deposit a given amount of dollars to an existing checking or savings account.

@@ -266,6 +266,7 @@ public class App implements Testable
                 statement.setDouble(5,0.0);
             }
             statement.executeUpdate();
+            this.logTransaction(tin,"Deposit",initialBalance,0,-1,id, null );
             return "0 " + id + " " + accountType + " " + initialBalance + " " + tin;
         }
         catch( SQLException e )
@@ -308,5 +309,44 @@ public class App implements Testable
         //3. then make an entry into Co_owns(accountId, tin)
         return "0";
     }
+
+   // String logTransaction = "INSERT INTO Transaction_Performed (tid, tdate, trans_type, amount, tfee, checknum, acc_to, acc_from)"+
+            //"VALUES(?,?,"Deposit", ?, 0, null, ?, null)";
+    //TO DO:
+    //createCheckingSavings() needs to log each new account as a deposit
+    //in order to do that we need to write a logtransaction function
+    // the log transaction function should also call the getDate function
+
+    public void logTransaction(String tid, String trans_type, double amount, double tfee, int checknum, String acc_to, String acc_from){
+        java.util.Date utilDate = new java.util.Date();
+        java.sql.Date tdate=new java.sql.Date(utilDate.getTime());
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery("SELECT cdate FROM Current_Date")) {
+                while (resultSet.next())
+                    tdate = resultSet.getDate(1);
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+        String insertTransaction= "INSERT INTO Transaction_Performed (tid, tdate, trans_type, amount, tfee, checknum, acc_to, acc_from)"+
+                "VALUES (?,?,?,?,?,?,?,?)";
+        try (PreparedStatement statement = _connection.prepareStatement(insertTransaction)) {
+            statement.setString(1,tid);
+            statement.setDate(2,tdate);
+            statement.setString(3,trans_type);
+            statement.setDouble(4,amount);
+            statement.setDouble(5,tfee);
+            statement.setInt(6,checknum);
+            statement.setString(7,acc_to);
+            statement.setString(8,acc_from);
+            statement.executeUpdate();
+        }
+        catch( SQLException e )
+        {
+            System.err.println( e.getMessage() );
+        }
+    }
+
 
 }
