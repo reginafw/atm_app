@@ -430,8 +430,99 @@ public class App implements Testable
  *         fromNewBalance is the new balance of the source pocket account, with up to 2 decimal places (e.g. with %.2f); and
  *         toNewBalance is the new balance of destination pocket account, with up to 2 decimal places.
  */
+
+//TO DO: make a method that will test if a pocket account has appeared in a transaction this month
     public String payFriend( String from, String to, double amount ){
-        return "0";
+        double to_balance=0;
+        double from_balance=0;
+        //get to balance
+        String checkBalance = "SELECT A.balance FROM Account_Owns A WHERE A.aid = ?";
+        try (PreparedStatement statement = _connection.prepareStatement(checkBalance)) {
+            statement.setString(1, to);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                while (resultSet.next())
+                    to_balance = resultSet.getDouble(1);
+            }
+        }catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+
+        //get from balance
+        try (PreparedStatement statement = _connection.prepareStatement(checkBalance)) {
+            statement.setString(1, from);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                while (resultSet.next())
+                    from_balance = resultSet.getDouble(1);
+            }
+        }catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+
+        String response ="1 "+ (Math.round(from_balance * 100.0)/100.0) + " "+ (Math.round(to_balance * 100.0)/100.0);
+
+        //check if either account is closed
+        if(this.isClosed(to) || this.isClosed(from))
+            return response;
+        //1. check if there have been transaction
+        //2. if amount is negative, return 1
+
+        if(amount<0)
+            return response;
+
+        //3. if amount is equal to the amount less than or equal to source balance
+        if(amount<=from_balance){
+            //update from balance
+            double new_from_balance = Math.round((from_balance - amount)*100.0)/100.0;
+            String updateBalance = "UPDATE Account_Owns A SET A.balance = ? WHERE A.aid = ?";
+            try(PreparedStatement s = _connection.prepareStatement(updateBalance)) {
+                s.setDouble(1, new_from_balance);
+                s.setString(2, from);
+                s.executeUpdate();
+            }
+            catch( SQLException e){
+                System.err.println( e.getMessage() );
+                return response;
+            }
+            //update to balance
+            double new_to_balance = Math.round((to_balance + amount)*100.0)/100.0;
+            try(PreparedStatement s = _connection.prepareStatement(updateBalance)) {
+                s.setDouble(1, new_to_balance);
+                s.setString(2, to);
+                s.executeUpdate();
+            }
+            catch( SQLException e){
+                System.err.println( e.getMessage() );
+                return "1 "+ (Math.round(new_from_balance * 100.0)/100.0) + " "+ (Math.round(to_balance * 100.0)/100.0);
+            }
+            //4. if new source balance is less than equal to 0.01, close account
+            if(new_from_balance<=0.01)
+                closeAccount(from);
+            return "0 "+ new_from_balance + " "+ new_to_balance;
+        }
+        //else amount would set balance negative
+        return response;
 
     }
+
+    //TO DO: figure this out and also put it in the payfreind function
+    //checks if pocket account has had a transaction this month
+    /*public boolean checkPocketTransaction(String aid){
+        //1. query transactions_owns table check if there is a row where the date's month is equal to the current date
+        String checkBalance = "SELECT * FROM Account_Owns A WHERE A.aid = ? AND (SELECT EXTRACT(MONTH FROM A.tdate) = "+
+                "(SELECT EXTRACT(MONTH FROM C.cdate) FROM Current_Date C))";
+        try (PreparedStatement statement = _connection.prepareStatement(checkBalance)) {
+            statement.setString(1, aid);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                if (resultSet.next())
+                    return true;
+            }
+        }catch( SQLException e){
+            System.err.println( e.getMessage() );
+            return false;
+        }
+        return false;
+    }*/
 }

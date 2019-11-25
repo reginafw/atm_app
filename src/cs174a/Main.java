@@ -35,9 +35,9 @@ public class Main
             //r = app.createTables();
             //System.out.println( r );
             //app.setDate(1998,07,26);
-            app.createCheckingSavingsAccount(AccountType.INTEREST_CHECKING,"77779",1200.39, "9096", "Lizard", "404 goodplace");
+            //app.createCheckingSavingsAccount(AccountType.INTEREST_CHECKING,"77779",1200.39, "9096", "Lizard", "404 goodplace");
             // Another example test.
-            //app.closeAccount("77777");
+            app.checkPocketTransaction("77777");
             //app.createCustomer("1235", "2626", "Regina", "68 DP");
             //r = app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "account1", 1234.56, "theTaxID", "Im YoungMing", "Known" );
         }
