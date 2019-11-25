@@ -142,5 +142,5 @@ interface Testable
      *         r = 0 for success, 1 for error; and
      *         id1 id2 ... idn is a list of space-separated closed account IDs.
      */
-    //String listClosedAccounts();
+    String listClosedAccounts();
 }

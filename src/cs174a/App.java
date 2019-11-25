@@ -267,7 +267,7 @@ public class App implements Testable
                 statement.setDouble(5,0.0);
             }
             statement.executeUpdate();
-            this.logTransaction(tin,"Deposit",initialBalance,0,null,id, null );
+            this.logTransaction("Deposit",initialBalance,0,null,id, null );
             return "0 " + id + " " + accountType + " " + initialBalance + " " + tin;
         }
         catch( SQLException e )
@@ -312,14 +312,24 @@ public class App implements Testable
     }
 
 
-    public void logTransaction(String tid, String trans_type, double amount, double tfee, String checknum, String acc_to, String acc_from){
+    public void logTransaction(String trans_type, double amount, double tfee, String checknum, String acc_to, String acc_from){
         java.util.Date utilDate = new java.util.Date();
         java.sql.Date tdate=new java.sql.Date(utilDate.getTime());
+        String tid ="0";
         try (Statement statement = _connection.createStatement()) {
             try (ResultSet resultSet = statement
                     .executeQuery("SELECT cdate FROM Current_Date")) {
                 while (resultSet.next())
                     tdate = resultSet.getDate(1);
+            }
+            try (ResultSet resultSet = statement
+                    .executeQuery("SELECT tid FROM Transaction_Performed")) {
+                if (resultSet.next()) {
+                    String last_tid = resultSet.getString(1);
+                    int n=Integer.parseInt(last_tid);
+                    n++;
+                    tid=Integer.toString(n);
+                }
             }
         } catch( SQLException e){
             System.err.println( e.getMessage() );
@@ -408,5 +418,20 @@ public class App implements Testable
             System.err.println( e.getMessage() );
             return false;
         }
+    }
+
+/**
+ * Move a specified amount of money from one pocket account to another pocket account.
+ * @param from Source pocket account ID.
+ * @param to Destination pocket account ID.
+ * @param amount Non-negative amount to pay.
+ * @return a string "r fromNewBalance toNewBalance", where
+ *         r = 0 for success, 1 for error.
+ *         fromNewBalance is the new balance of the source pocket account, with up to 2 decimal places (e.g. with %.2f); and
+ *         toNewBalance is the new balance of destination pocket account, with up to 2 decimal places.
+ */
+    public String payFriend( String from, String to, double amount ){
+        return "0";
+
     }
 }
