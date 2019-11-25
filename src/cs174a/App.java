@@ -2,6 +2,7 @@ package cs174a;                                             // THE BASE PACKAGE 
 
 // You may have as many imports as you need.
 import java.sql.*;
+import java.lang.*;
 import java.time.LocalDate;
 import java.util.Properties;
 import oracle.jdbc.pool.OracleDataSource;
@@ -141,7 +142,7 @@ public class App implements Testable
                 "trans_type VARCHAR(100),"+
                 "amount REAL,"+
                 "tfee REAL,"+
-                "checknum INTEGER,"+
+                "checknum VARCHAR(100),"+
                 "acc_to VARCHAR(100) NOT NULL,"+
                 "acc_from VARCHAR(100),"+
                 "PRIMARY KEY(tid),"+
@@ -266,7 +267,7 @@ public class App implements Testable
                 statement.setDouble(5,0.0);
             }
             statement.executeUpdate();
-            this.logTransaction(tin,"Deposit",initialBalance,0,-1,id, null );
+            this.logTransaction(tin,"Deposit",initialBalance,0,null,id, null );
             return "0 " + id + " " + accountType + " " + initialBalance + " " + tin;
         }
         catch( SQLException e )
@@ -310,14 +311,8 @@ public class App implements Testable
         return "0";
     }
 
-   // String logTransaction = "INSERT INTO Transaction_Performed (tid, tdate, trans_type, amount, tfee, checknum, acc_to, acc_from)"+
-            //"VALUES(?,?,"Deposit", ?, 0, null, ?, null)";
-    //TO DO:
-    //createCheckingSavings() needs to log each new account as a deposit
-    //in order to do that we need to write a logtransaction function
-    // the log transaction function should also call the getDate function
 
-    public void logTransaction(String tid, String trans_type, double amount, double tfee, int checknum, String acc_to, String acc_from){
+    public void logTransaction(String tid, String trans_type, double amount, double tfee, String checknum, String acc_to, String acc_from){
         java.util.Date utilDate = new java.util.Date();
         java.sql.Date tdate=new java.sql.Date(utilDate.getTime());
         try (Statement statement = _connection.createStatement()) {
@@ -337,7 +332,7 @@ public class App implements Testable
             statement.setString(3,trans_type);
             statement.setDouble(4,amount);
             statement.setDouble(5,tfee);
-            statement.setInt(6,checknum);
+            statement.setString(6,checknum);
             statement.setString(7,acc_to);
             statement.setString(8,acc_from);
             statement.executeUpdate();
@@ -348,5 +343,70 @@ public class App implements Testable
         }
     }
 
+    public String listClosedAccounts(){
+        String message="0";
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery("SELECT aid FROM Closed")) {
+                while(resultSet.next()) {
+                    String r = (resultSet.getString(1));
+                    message=message+" "+r;
+                }
+            }
+            return message;
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+            return "1 ";
+        }
+    }
 
+    public void closeAccount(String aid){
+        //1. check if account has a pocket account by checking if it exists in Pocket
+        //2. if it does, insert pocket account into closed
+        String checkForPocket = "SELECT P.aid FROM Pocket P WHERE P.aid = ?";
+        try (PreparedStatement statement = _connection.prepareStatement(checkForPocket)) {
+            statement.setString(1,aid);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                if(resultSet.next()) {
+                    String paid=resultSet.getString(1);
+                    String createCustomer = "INSERT INTO Closed (aid)"+
+                            "VALUES(?)";
+                    try(PreparedStatement s = _connection.prepareStatement(createCustomer)) {
+                        s.setString(1, paid);
+                        s.executeUpdate();
+                    }
+                }
+            }
+            String createCustomer = "INSERT INTO Closed (aid)"+
+                    "VALUES(?)";
+            try(PreparedStatement s = _connection.prepareStatement(createCustomer)) {
+                s.setString(1, aid);
+                s.executeUpdate();
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+
+        //3. insert aid account into closed
+    }
+
+    //returns true if account is closed
+    //returns false if account is open
+    public boolean isClosed(String aid){
+        String checkForClosed = "SELECT C.aid FROM Closed C WHERE C.aid = ?";
+        try (PreparedStatement statement = _connection.prepareStatement(checkForClosed)) {
+            statement.setString(1,aid);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                if(resultSet.next()) {
+                    return true;
+                }
+                return false;
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+            return false;
+        }
+    }
 }
