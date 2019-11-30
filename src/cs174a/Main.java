@@ -35,10 +35,18 @@ public class Main
             //r = app.createTables();
             //System.out.println( r );
             //app.setDate(1998,07,26);
-            //app.createCheckingSavingsAccount(AccountType.INTEREST_CHECKING,"77779",1200.39, "9096", "Lizard", "404 goodplace");
+            //app.createCheckingSavingsAccount(AccountType.INTEREST_CHECKING,"111",1200.39, "9096", "Lizard", "404 goodplace");
             // Another example test.
-            app.checkPocketTransaction("77777");
+            //app.checkPocketTransaction("77777");
             //app.createCustomer("1235", "2626", "Regina", "68 DP");
+            //app.tester();
+            app.setDate(1998,01,05);
+            if(app.checkPocketTransaction("332")==true)
+                System.out.println("transaction happened");
+            if(app.checkPocketTransaction("332")==false)
+                System.out.println("transaction did not happen");
+            //app.payFriend("1000","999", 10.99);
+            //app.topUp("999",13.30);
             //r = app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "account1", 1234.56, "theTaxID", "Im YoungMing", "Known" );
         }
     }

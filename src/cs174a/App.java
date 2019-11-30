@@ -1,8 +1,10 @@
 package cs174a;                                             // THE BASE PACKAGE FOR YOUR APP MUST BE THIS ONE.  But you may add subpackages.
 
 // You may have as many imports as you need.
+import java.math.RoundingMode;
 import java.sql.*;
 import java.lang.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Properties;
 import oracle.jdbc.pool.OracleDataSource;
@@ -14,6 +16,7 @@ import oracle.jdbc.OracleConnection;
  */
 public class App implements Testable
 {
+    String tid ="3";
     private OracleConnection _connection;                   // Example connection object to your DB.
 
     /**
@@ -315,7 +318,7 @@ public class App implements Testable
     public void logTransaction(String trans_type, double amount, double tfee, String checknum, String acc_to, String acc_from){
         java.util.Date utilDate = new java.util.Date();
         java.sql.Date tdate=new java.sql.Date(utilDate.getTime());
-        String tid ="0";
+
         try (Statement statement = _connection.createStatement()) {
             try (ResultSet resultSet = statement
                     .executeQuery("SELECT cdate FROM Current_Date")) {
@@ -324,7 +327,7 @@ public class App implements Testable
             }
             try (ResultSet resultSet = statement
                     .executeQuery("SELECT tid FROM Transaction_Performed")) {
-                if (resultSet.next()) {
+                while (resultSet.next()) {
                     String last_tid = resultSet.getString(1);
                     int n=Integer.parseInt(last_tid);
                     n++;
@@ -506,14 +509,133 @@ public class App implements Testable
 
     }
 
-    //TO DO: figure this out and also put it in the payfreind function
-    //checks if pocket account has had a transaction this month
-    /*public boolean checkPocketTransaction(String aid){
-        //1. query transactions_owns table check if there is a row where the date's month is equal to the current date
-        String checkBalance = "SELECT * FROM Account_Owns A WHERE A.aid = ? AND (SELECT EXTRACT(MONTH FROM A.tdate) = "+
-                "(SELECT EXTRACT(MONTH FROM C.cdate) FROM Current_Date C))";
+    /*public String createPocketAccount( String id, String linkedId, double initialTopUp, String tin ){
+        //check that account is not closed
+        String errorMessage="1 "+ id+" "+AccountType.POCKET+" "+ initialTopUp+" "+tin;
+        if(this.isClosed(linkedId))
+            return errorMessage;
+        //1. check that linkedId account exists in Account_owns and that that account is not another pocket account
+        String checkAccount = "SELECT * FROM Account_Owns A WHERE A.aid = ? AND A.acc_type <> ?";
+        try (PreparedStatement statement = _connection.prepareStatement(checkAccount)) {
+            statement.setString(1, linkedId);
+            statement.setString(2, AccountType.POCKET);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                if(resultSet.next()) {
+                    //2. String s=topUp(id, initialTopUP)
+                    //if (s.equals(//topUp success message){
+                        //insert into Account_Owns Table a row of type pocket
+                        //insert into Pocket Table
+                        //
+                    //}
+                }
+                else{
+                    return errorMessage;
+                }
+            }
+        }catch( SQLException e){
+            System.err.println( e.getMessage() );
+            return errorMessage;
+        }
+    }*/
+
+
+    public String topUp( String accountId, double amount ){
+        if(this.isClosed(accountId))
+            return "1";
+        //1. select aid from Pocket where paid=accountID
+        String aid="";
+        String getaid="SELECT P.aid FROM Pocket P WHERE P.paid=?";
+        try (PreparedStatement statement = _connection.prepareStatement(getaid)) {
+            statement.setString(1, accountId);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                if (resultSet.next()) {
+                    aid = resultSet.getString(1);
+                    if(this.isClosed(aid))
+                        //check account is not closed
+                        return "1";
+                    //2. update the main account's balance to be -amount CHECK if the balance is above $0.01
+                    double newMainBalance=this.checkBalance(aid,amount,"minus");
+                    if(newMainBalance > 0){
+                        String updateBalance="UPDATE Account_Owns A SET A.balance = ? WHERE A.aid = ?";
+                        try(PreparedStatement s = _connection.prepareStatement(updateBalance)) {
+                            s.setDouble(1, newMainBalance);
+                            s.setString(2, aid);
+                            s.executeUpdate();
+                        }
+                        double newPocketBalance=this.checkBalance(accountId,amount, "plus");
+                        try(PreparedStatement s = _connection.prepareStatement(updateBalance)) {
+                            s.setDouble(1, newPocketBalance);
+                            s.setString(2, accountId);
+                            s.executeUpdate();
+                        }
+                        this.logTransaction("Top Up",amount,0,null,accountId,aid);
+                    }
+                    if(newMainBalance <=0.01)
+                        this.closeAccount(aid);
+                }
+            }
+        }catch( SQLException e){
+            System.err.println( e.getMessage() );
+            return "1";
+        }
+
+        //3. update the pocket account's balance in the Account_owns table to be +amount
+        //4. make an entry in Transaction_Performed
+        return "1";
+    }
+
+
+    public String deposit( String accountId, double amount ){
+        //1. update the account
+        //check that account is not in closed
+        //2. check that accountId corresponds to a savings account or a checking account
+        //3. insert into Transaction_Performed
+        return "0";
+    }
+
+
+    public String showBalance( String accountId ){
+        //1. select balance from Account_Owns where aid=accountId
+        return "0";
+    }
+
+
+    //TO DO: fix it so that 13.5 will display as 13.50 in db
+    public double checkBalance(String aid, double amount, String op){
+        double balance=0;
+        String checkBalance = "SELECT A.balance FROM Account_Owns A WHERE A.aid = ?";
         try (PreparedStatement statement = _connection.prepareStatement(checkBalance)) {
             statement.setString(1, aid);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                while (resultSet.next())
+                    balance = resultSet.getDouble(1);
+            }
+        }catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+
+        if(op.equals("minus"))
+            balance-=amount;
+        else
+            balance+=amount;
+        BigDecimal bd = new BigDecimal(balance);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    //TO DO: figure this out and also put it in the payfreind function
+    //checks if pocket account has had a transaction this month
+    public boolean checkPocketTransaction(String aid){
+        //1. query transactions_owns table check if there is a row where the date's month is equal to the current date
+        String checkBalance = "SELECT * FROM Transaction_Performed T WHERE (T.acc_to = ? OR T.acc_from = ? ) " +
+                "AND EXTRACT(MONTH FROM T.tdate) = "+
+                "(SELECT EXTRACT(MONTH FROM C.cdate) FROM Current_Date C)";
+        try (PreparedStatement statement = _connection.prepareStatement(checkBalance)) {
+            statement.setString(1, aid);
+            statement.setString(2, aid);
             try (ResultSet resultSet = statement
                     .executeQuery()) {
                 if (resultSet.next())
@@ -524,5 +646,19 @@ public class App implements Testable
             return false;
         }
         return false;
-    }*/
+    }
+    //AND extract(month FROM T.timestamp) = (select MAX(extract(month FROM C.timestamp)) FROM currentdate C)")
+
+    public void tester(){
+        try (Statement statement = _connection.createStatement()) {
+            //statement.executeUpdate("INSERT INTO Account_Owns(aid, branch, acc_type, balance, interest_rate, interest, taxid)"+
+                   // "VALUES('1000', 'isla vista', 'POCKET', 1000.00, 0.0,0.0,'9096')");
+            statement.executeUpdate("INSERT INTO Pocket (paid, aid, pocket_fee) VALUES ('1000', '667', 0)");
+
+        }
+        catch( SQLException e )
+        {
+            System.err.println( e.getMessage() );
+        }
+    }
 }
