@@ -40,13 +40,13 @@ public class Main
             //app.checkPocketTransaction("77777");
             //app.createCustomer("1235", "2626", "Regina", "68 DP");
             //app.tester();
-            app.setDate(1998,01,05);
-            if(app.checkPocketTransaction("332")==true)
-                System.out.println("transaction happened");
-            if(app.checkPocketTransaction("332")==false)
-                System.out.println("transaction did not happen");
-            //app.payFriend("1000","999", 10.99);
-            //app.topUp("999",13.30);
+            //app.setDate(1998,05,05);
+            //if(app.checkPocketTransaction("332")==true)
+                //System.out.println("transaction happened");
+            //if(app.checkPocketTransaction("332")==false)
+                //System.out.println("transaction did not happen");
+            app.payFriend("1000","999", 10.99);
+            //app.topUp("999",100.00);
             //r = app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "account1", 1234.56, "theTaxID", "Im YoungMing", "Known" );
         }
     }

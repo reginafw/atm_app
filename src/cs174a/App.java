@@ -436,6 +436,7 @@ public class App implements Testable
 
 //TO DO: make a method that will test if a pocket account has appeared in a transaction this month
     public String payFriend( String from, String to, double amount ){
+        double fee=0;
         double to_balance=0;
         double from_balance=0;
         //get to balance
@@ -474,6 +475,15 @@ public class App implements Testable
         if(amount<0)
             return response;
 
+        if(this.checkPocketTransaction(from)) {
+            from_balance -= 5;
+            fee=5.00;
+        }
+        if(this.checkPocketTransaction(to)) {
+            to_balance -= 5;
+            fee=5.00;
+        }
+
         //3. if amount is equal to the amount less than or equal to source balance
         if(amount<=from_balance){
             //update from balance
@@ -499,6 +509,8 @@ public class App implements Testable
                 System.err.println( e.getMessage() );
                 return "1 "+ (Math.round(new_from_balance * 100.0)/100.0) + " "+ (Math.round(to_balance * 100.0)/100.0);
             }
+            //String trans_type, double amount, double tfee, String checknum, String acc_to, String acc_from
+            this.logTransaction("Pay-Friend", amount, fee, null, to, from);
             //4. if new source balance is less than equal to 0.01, close account
             if(new_from_balance<=0.01)
                 closeAccount(from);
@@ -541,6 +553,8 @@ public class App implements Testable
 
 
     public String topUp( String accountId, double amount ){
+        double fee=0.00;
+        boolean firstTrans=this.checkPocketTransaction(accountId);
         if(this.isClosed(accountId))
             return "1";
         //1. select aid from Pocket where paid=accountID
@@ -559,6 +573,11 @@ public class App implements Testable
                     double newMainBalance=this.checkBalance(aid,amount,"minus");
                     if(newMainBalance > 0){
                         String updateBalance="UPDATE Account_Owns A SET A.balance = ? WHERE A.aid = ?";
+                        //fee if it is the first transaction of the month
+                        if(firstTrans) {
+                            newMainBalance -= 5;
+                            fee=5;
+                        }
                         try(PreparedStatement s = _connection.prepareStatement(updateBalance)) {
                             s.setDouble(1, newMainBalance);
                             s.setString(2, aid);
@@ -570,7 +589,7 @@ public class App implements Testable
                             s.setString(2, accountId);
                             s.executeUpdate();
                         }
-                        this.logTransaction("Top Up",amount,0,null,accountId,aid);
+                        this.logTransaction("Top Up",amount,fee,null,accountId,aid);
                     }
                     if(newMainBalance <=0.01)
                         this.closeAccount(aid);
@@ -626,8 +645,8 @@ public class App implements Testable
         return bd.doubleValue();
     }
 
-    //TO DO: figure this out and also put it in the payfreind function
     //checks if pocket account has had a transaction this month
+    //returns true if first transaction
     public boolean checkPocketTransaction(String aid){
         //1. query transactions_owns table check if there is a row where the date's month is equal to the current date
         String checkBalance = "SELECT * FROM Transaction_Performed T WHERE (T.acc_to = ? OR T.acc_from = ? ) " +
@@ -639,15 +658,15 @@ public class App implements Testable
             try (ResultSet resultSet = statement
                     .executeQuery()) {
                 if (resultSet.next())
-                    return true;
+                    return false;
             }
         }catch( SQLException e){
             System.err.println( e.getMessage() );
             return false;
         }
-        return false;
+        return true;
     }
-    //AND extract(month FROM T.timestamp) = (select MAX(extract(month FROM C.timestamp)) FROM currentdate C)")
+
 
     public void tester(){
         try (Statement statement = _connection.createStatement()) {
