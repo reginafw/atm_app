@@ -21,7 +21,6 @@ public class Main
     //!### COMENZAMOS
     public static void main( String[] args )
     {
-        System.out.println("hello");
         App app = new App();                        // We need the default constructor of your App implementation.  Make sure such
         // constructor exists.
         String r = app.initializeSystem();
@@ -34,20 +33,19 @@ public class Main
             // Example tests.  We'll overwrite your Main.main() function with our final tests.
             //r = app.createTables();
             //System.out.println( r );
-            //app.setDate(1998,07,26);
+
+
             //app.createCheckingSavingsAccount(AccountType.INTEREST_CHECKING,"111",1200.39, "9096", "Lizard", "404 goodplace");
             // Another example test.
-            //app.checkPocketTransaction("77777");
-            //app.createCustomer("1235", "2626", "Regina", "68 DP");
-            //app.tester();
-            //app.setDate(1998,05,05);
-            //if(app.checkPocketTransaction("332")==true)
-                //System.out.println("transaction happened");
-            //if(app.checkPocketTransaction("332")==false)
-                //System.out.println("transaction did not happen");
-            app.payFriend("1000","999", 10.99);
-            //app.topUp("999",100.00);
-            //r = app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "account1", 1234.56, "theTaxID", "Im YoungMing", "Known" );
+           //app.dropTables();
+            /*app.createTables();
+            app.setDate(1998,11,30);*/
+
+            //app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "001", 1234.56, "600", "Lizard", "123 Goleta" );
+            //app.createPocketAccount("201","001",100.00,"600","Goleta");
+            //app.topUp("201",1129.56);
+            app.deleteClosedAccounts();
+            //app.deleteTransactions();
         }
     }
 
