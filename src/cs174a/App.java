@@ -1120,7 +1120,169 @@ public class App implements Testable
 
 
     public void generateMonthlyStatement(String taxid){
+        if(!this.exists(taxid, "Account_Owns", "Customer")){
+            System.out.println("Sorry, this customer is not a primary owner of an account");
+            return;
+        }
 
+        double f=0;
+        this.getMonth();
+        String getPrimaryAccounts="SELECT A.aid FROM Account_Owns A WHERE A.taxid = ?";
+        try (PreparedStatement statement = _connection.prepareStatement(getPrimaryAccounts)) {
+            statement.setString(1, taxid);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                while (resultSet.next()) {
+                    String s=(resultSet.getString(1));
+                    System.out.println("Account "+s);
+                    this.getPrimaryOwner(s);
+                    this.getCoOwner(s);
+                    System.out.println();
+                    System.out.println("Transactions");
+                    this.listTransactions(s);
+                    System.out.println();
+                    f+=this.getInitialFinalBalance(s);
+                    System.out.println("-----------------------");
+                    System.out.println();
+                }
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        String getSecondaryAccounts="SELECT C.aid FROM Co_owns C WHERE C.taxid = ?";
+        if(this.exists(taxid,"Co_owns","Customer")){
+            try (PreparedStatement statement = _connection.prepareStatement(getSecondaryAccounts)) {
+                statement.setString(1, taxid);
+                try (ResultSet resultSet = statement
+                        .executeQuery()) {
+                    while (resultSet.next()) {
+                        String s=(resultSet.getString(1));
+                        System.out.println("Account "+s);
+                        this.getPrimaryOwner(s);
+                        this.getCoOwner(s);
+                        System.out.println();
+                        System.out.println("Transactions");
+                        this.listTransactions(s);
+                        System.out.println();
+                        f+=this.getInitialFinalBalance(s);
+                        System.out.println("-----------------------");
+                        System.out.println();
+                    }
+                } catch (SQLException e) {
+                    System.err.println(e.getMessage());
+                }
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+        System.out.println("Total balance: "+String.format( "%.2f", f));
+        if(f>100000)
+            System.out.println("Warning: Limit of insurance reached");
+
+    }
+
+    public void getMonth() {
+        String sql= "(SELECT EXTRACT(MONTH FROM C.cdate) FROM Current_Date C)";
+        try( Statement statement = _connection.createStatement() ){
+            try (ResultSet resultSet = statement
+                    .executeQuery(sql)) {
+                while (resultSet.next()) {
+                    String s = (resultSet.getString(1));
+                    if(s.equals("1"))
+                        s="Janurary";
+                    else if(s.equals("2"))
+                        s="February";
+                    else if(s.equals("3"))
+                        s="March";
+                    else if(s.equals("4"))
+                        s="April";
+                    else if(s.equals("5"))
+                        s="May";
+                    else if(s.equals("6"))
+                        s="June";
+                    else if(s.equals("7"))
+                        s="July";
+                    else if(s.equals("8"))
+                        s="August";
+                    else if(s.equals("9"))
+                        s="September";
+                    else if(s.equals("10"))
+                        s="October";
+                    else if(s.equals("11"))
+                        s="November";
+                    else if(s.equals("12"))
+                        s="December";
+
+                    System.out.println("Statement for month of "+s);
+                    System.out.println();
+                }
+            }
+        }catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+    }
+
+    public void getCoOwner(String aid){
+        String sql="SELECT C.name, C.address FROM Customer C WHERE C.taxid IN (SELECT Z.taxid FROM Co_owns Z  WHERE Z.aid = "+aid+")";
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery(sql)) {
+                while(resultSet.next()) {
+                    String s = (resultSet.getString(1));
+                    String a = (resultSet.getString(2));
+                    System.out.println("Co-Owner: "+s+", "+a);
+                }
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+    }
+
+    public void getPrimaryOwner(String aid){
+        String sql="SELECT C.name, C.address FROM Customer C WHERE C.taxid IN (SELECT A.taxid FROM Account_Owns A  WHERE A.aid = "+aid+")";
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery(sql)) {
+                while(resultSet.next()) {
+                    String s = (resultSet.getString(1));
+                    String a = (resultSet.getString(2));
+                    System.out.println("Primary Owner: "+s+", "+a);
+                }
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+    }
+
+    public double getInitialFinalBalance(String aid){
+        String init="SELECT I.init_balance FROM Initial_Balance I WHERE I.aid="+aid;
+        String fin="SELECT A.balance FROM Account_Owns A WHERE A.aid="+aid;
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery(init)) {
+                while(resultSet.next()) {
+                    double i = (resultSet.getDouble(1));
+                    System.out.println("Initial Balance: "+String.format( "%.2f", i ));
+                }
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery(fin)) {
+                while(resultSet.next()) {
+                    double f = (resultSet.getDouble(1));
+                    System.out.println("Final Balance: "+String.format( "%.2f", f ));
+                    return f;
+                }
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+        return 0;
     }
 
     public void insertInitialBalance(String aid, double amount){
@@ -1151,6 +1313,100 @@ public class App implements Testable
             System.err.println( e.getMessage() );
         }
     }
+
+    public void listTransactions(String aid){
+        java.util.Date utilDate = new java.util.Date();
+        java.sql.Date tdate=new java.sql.Date(utilDate.getTime());
+        String sql="SELECT tdate, trans_type, amount FROM Transaction_Performed WHERE acc_to ="+aid;
+        String sql2="SELECT tdate, trans_type, amount FROM Transaction_Performed WHERE acc_from ="+aid;
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery(sql)) {
+                while(resultSet.next()) {
+                    tdate=(resultSet.getDate(1));
+                    String s = (resultSet.getString(2));
+                    double b = (resultSet.getDouble(3));
+                    System.out.println(tdate+" "+s+" "+b);
+                }
+            }
+            try (ResultSet resultSet = statement
+                    .executeQuery(sql2)) {
+                while(resultSet.next()) {
+                    tdate=(resultSet.getDate(1));
+                    String s = (resultSet.getString(2));
+                    double b = (resultSet.getDouble(3));
+                    System.out.println(tdate+" "+s+" "+b);
+                }
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+    }
+
+    //for each customer
+    //1. SELECT A.aid FROM Account_Owns A WHERE A.taxid = ?
+    ///for each one, SELECT T.amount FROM Transaction_Performed T WHERE acc_to =? and type=wire and deposit and transfer
+    //add it to the totalIncomingFunds
+    //2. SELECT C.aid FROM Co_owns C WHERE C.taxid=?
+    //do the same thing and keep adding
+
+    public double getIncomingFunds(String aid){
+        double amount=0;
+        String sql="SELECT T.amount FROM Transaction_Performed T WHERE T.acc_to =? " +
+                "AND (T.trans_type='Wire' OR T.trans_type='Deposit' OR T.trans_type='Transfer')";
+        try (PreparedStatement statement = _connection.prepareStatement(sql)) {
+            statement.setString(1,aid);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                while(resultSet.next()) {
+                    amount += (resultSet.getDouble(1));
+                }
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+        return amount;
+    }
+
+    public void checkCustomerAmount(String taxid){
+        String aid;
+        double total=0;
+        String sql = "SELECT A.aid FROM Account_Owns A WHERE A.taxid = ?";
+        try (PreparedStatement statement = _connection.prepareStatement(sql)) {
+            statement.setString(1,taxid);
+            try (ResultSet resultSet = statement
+                    .executeQuery()) {
+                while(resultSet.next()) {
+                    aid = (resultSet.getString(1));
+                    total+=this.getIncomingFunds(aid);
+                }
+            }
+        } catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+
+        if(total>10000)
+            System.out.println("taxid: " +taxid);
+    }
+
+    public void generateDTER(){
+        System.out.println("List of customers with more than $10,000 incoming to accounts");
+        String sql= "SELECT C.taxid FROM Customer C";
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery(sql)) {
+                while (resultSet.next()) {
+                    String taxid = (resultSet.getString(1));
+                    this.checkCustomerAmount(taxid);
+                }
+            }
+        }catch( SQLException e){
+            System.err.println( e.getMessage() );
+        }
+    }
+
+
+
 
 
 }

@@ -44,15 +44,21 @@ public class Main
             //app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "001", 1234.56, "600", "Lizard", "123 Goleta" );
             //app.createPocketAccount("201","001",100.00,"600","Goleta");
             //app.topUp("201",1129.56);
-            //app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "002", 1234.56, "600", "Lizard", "123 Goleta" );
+            //app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "003", 1200.56, "700", "Noa", "Disneyworld" );
             //app.createPocketAccount("202","002",10.00,"600","SB");
             //app.withdrawal("002", 18.99);
-            app.deleteClosedAccounts();
+            //app.deleteClosedAccounts();
             //app.deleteTransactions();
-
+            //app.listTransactions("201");
+            //app.createCustomer("001","500","Regina", "Disneyland");
+            //app.createCustomer("001","700","Noa", "Disneyworld");
             //app.dropTables();
             //app.createTables();
             //app.populateInitialBalance();
+            //app.generateMonthlyStatement("500");
+            //app.deposit("003",12000);
+            app.generateDTER();
+           // app.checkCustomerAmount("700");
         }
     }
 
