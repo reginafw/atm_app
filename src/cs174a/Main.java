@@ -40,12 +40,19 @@ public class Main
            //app.dropTables();
             /*app.createTables();
             app.setDate(1998,11,30);*/
-
+            //app.setDate(1999,11,30);
             //app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "001", 1234.56, "600", "Lizard", "123 Goleta" );
             //app.createPocketAccount("201","001",100.00,"600","Goleta");
             //app.topUp("201",1129.56);
+            //app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "002", 1234.56, "600", "Lizard", "123 Goleta" );
+            //app.createPocketAccount("202","002",10.00,"600","SB");
+            //app.withdrawal("002", 18.99);
             app.deleteClosedAccounts();
             //app.deleteTransactions();
+
+            //app.dropTables();
+            //app.createTables();
+            //app.populateInitialBalance();
         }
     }
 

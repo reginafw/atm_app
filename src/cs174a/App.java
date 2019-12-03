@@ -103,6 +103,7 @@ public class App implements Testable
             statement.executeUpdate("DROP TABLE Co_owns");
             statement.executeUpdate("DROP TABLE Pocket");
             statement.executeUpdate("DROP TABLE Closed");
+            statement.executeUpdate("DROP TABLE Initial_Balance");
             statement.executeUpdate("DROP TABLE Account_Owns");
             statement.executeUpdate("DROP TABLE Customer");
             statement.executeUpdate("DROP TABLE Current_Date");
@@ -176,6 +177,12 @@ public class App implements Testable
                 "PRIMARY KEY(aid),"+
                 "FOREIGN KEY(aid) REFERENCES Account_Owns(aid))";
 
+        String createInitialBalance = "CREATE TABLE Initial_Balance("+
+                "aid VARCHAR(100), "+
+                "init_balance REAL,"+
+                "PRIMARY KEY(aid),"+
+                "FOREIGN KEY(aid) REFERENCES Account_Owns(aid))";
+
         try (Statement statement = _connection.createStatement()) {
             statement.executeUpdate(createCustomer);
             statement.executeUpdate(createAccount_Owns);
@@ -184,6 +191,7 @@ public class App implements Testable
             statement.executeUpdate(createTransaction_Performed);
             statement.executeUpdate(createClosed);
             statement.executeUpdate(createDate);
+            statement.executeUpdate(createInitialBalance);
             return "0";
         }
         catch( SQLException e )
@@ -271,6 +279,7 @@ public class App implements Testable
             }
             statement.executeUpdate();
             this.logTransaction("Deposit",initialBalance,0,null,id, null );
+            this.insertInitialBalance(id,initialBalance);
             return "0 " + id + " " + accountType + " " + initialBalance + " " + tin;
         }
         catch( SQLException e )
@@ -597,12 +606,12 @@ public class App implements Testable
                     String insertAcc= "INSERT INTO Account_Owns (AID, BRANCH, ACC_TYPE, BALANCE, INTEREST_RATE, INTEREST, TAXID) VALUES (?,?,'POCKET',0,0,0,?)";
                     try(PreparedStatement s = _connection.prepareStatement(insertAcc)) {
 
-                        System.out.println("NO ERROR YET");
+
                         s.setString(1, id);
                         s.setString(2, branch);
                         s.setString(3, tin);
                         s.executeUpdate();
-                        System.out.println("NO ERROR YET");
+
 
                         String insertPocket = "INSERT INTO Pocket (PAID ,AID, POCKET_FEE) VALUES (?,?,0.00) ";
                         try (PreparedStatement s1 = _connection.prepareStatement(insertPocket)){
@@ -610,6 +619,7 @@ public class App implements Testable
                             s1.setString(2, linkedId);
                             s1.executeUpdate();
                             this.topUp(id, initialTopUp);
+                            this.insertInitialBalance(id,initialTopUp);
                         }catch (SQLException e){
                             System.out.println("Error 1");
                             return  "1";
@@ -929,6 +939,18 @@ public class App implements Testable
     }
 
     public void deleteTransactions(){
+        String createTable=" CREATE TABLE Transaction_Performed("+
+                "tid VARCHAR(100), "+
+                "tdate DATE, "+
+                "trans_type VARCHAR(100),"+
+                "amount REAL,"+
+                "tfee REAL,"+
+                "checknum VARCHAR(100),"+
+                "acc_to VARCHAR(100) NOT NULL,"+
+                "acc_from VARCHAR(100),"+
+                "PRIMARY KEY(tid),"+
+                "FOREIGN KEY(acc_to) REFERENCES Account_Owns(aid), "+
+                "FOREIGN KEY(acc_from) REFERENCES Account_Owns(aid))";
         if(!isLastDay()) {
             System.out.println("Sorry, it is not the last day of the month");
             return;
@@ -936,6 +958,7 @@ public class App implements Testable
         try (Statement statement = _connection.createStatement()) {
             statement.executeUpdate("DROP TABLE Transaction_Performed");
             System.out.println("Transactions deleted");
+            statement.executeUpdate(createTable);
         }
         catch( SQLException e )
         {
@@ -1040,12 +1063,14 @@ public class App implements Testable
             this.deleteEntry(paid, "Transaction_Performed", "acc_to");
             this.deleteEntry(paid, "Transaction_Performed", "acc_from");
             this.deleteEntry(paid, "Closed", "aid");
+            this.deleteEntry(paid,"Initial_Balance","aid");
             this.deleteEntry(paid, "Account_Owns","aid");
         }
             //a. delete the entry in pocket, then delete the entry in Account_Owns
         if(this.exists(aid, "Co_owns", "Account"))
             deleteEntry(aid,"Co_owns", "aid");
         this.deleteEntry(aid, "Closed","aid");
+        this.deleteEntry(aid,"Initial_Balance","aid");
         this.deleteEntry(aid, "Transaction_Performed", "acc_to");
         this.deleteEntry(aid, "Transaction_Performed", "acc_from");
         if(this.exists(aid,"Account_Owns", "Account"))
@@ -1089,6 +1114,40 @@ public class App implements Testable
         }
         catch( SQLException e )
         {
+            System.err.println( e.getMessage() );
+        }
+    }
+
+
+    public void generateMonthlyStatement(String taxid){
+
+    }
+
+    public void insertInitialBalance(String aid, double amount){
+        String insert = "INSERT INTO Initial_Balance (aid, init_balance) VALUES(?,?)";
+        try (PreparedStatement statement = _connection.prepareStatement(insert)){
+            statement.setString(1,aid);
+            statement.setDouble(2,amount);
+            statement.executeUpdate();
+        }
+        catch( SQLException e )
+        {
+            System.err.println( e.getMessage() );
+            System.out.println("tried "+aid);
+        }
+    }
+
+    public void populateInitialBalance(){
+        try (Statement statement = _connection.createStatement()) {
+            try (ResultSet resultSet = statement
+                    .executeQuery("SELECT aid, balance FROM Account_Owns")) {
+                while(resultSet.next()) {
+                    String s = (resultSet.getString(1));
+                    double b = (resultSet.getDouble(2));
+                    this.insertInitialBalance(s,b);
+                }
+            }
+        } catch( SQLException e){
             System.err.println( e.getMessage() );
         }
     }
