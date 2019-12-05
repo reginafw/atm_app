@@ -40,8 +40,19 @@ public class Main
            //app.dropTables();
             /*app.createTables();
             app.setDate(1998,11,30);*/
-            //app.setDate(1999,11,30);
-            //app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "001", 1234.56, "600", "Lizard", "123 Goleta" );
+            /*app.setDate(1999,11,26);
+            app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "001", 2000.00, "600", "Lizard", "123 Goleta" );
+            app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "002", 3000.00, "600", "Lizard", "123 Goleta" );
+            app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "003", 4000.00, "600", "Lizard", "123 Goleta" );*/
+            /*app.setDate(1999,11,27);
+            app.deposit("001",1000);
+            app.deposit("002",1000);
+            app.deposit("003",1000);*/
+            /*app.setDate(1999,11,28);
+            app.withdrawal("001",1000);
+            app.withdrawal("002",1000);
+            app.withdrawal("003",1000);*/
+            //app.setDate(1999,11,29);
             //app.createPocketAccount("201","001",100.00,"600","Goleta");
             //app.topUp("201",1129.56);
             //app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "003", 1200.56, "700", "Noa", "Disneyworld" );
@@ -57,8 +68,21 @@ public class Main
             //app.populateInitialBalance();
             //app.generateMonthlyStatement("500");
             //app.deposit("003",12000);
-            app.generateDTER();
+            //app.generateDTER();
+            //app.SetPin("600",0,2000);
            // app.checkCustomerAmount("700");
+            //app.startAtm();
+            //app.accountUtility(AccountType.INTEREST_CHECKING,"1234",3000,"700","Alameda");
+            //app.wire("003","001",100.00,"600");
+            //app.collect("201","001",10.00);
+            //app.deposit("001",1.00);
+            //app.dropTables();
+            //app.createTables();
+            //app.entryAvgBalance("002", 1000);
+            app.accrueInterest();
+            //System.out.println(app.getInterestRateFromType(AccountType.SAVINGS));
+           // app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "006", 8000.00, "600", "Lizard", "123 Goleta" );
+            //app.setInterestRate(AccountType.INTEREST_CHECKING,0.0025);
         }
     }
 
