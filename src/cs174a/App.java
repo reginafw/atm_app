@@ -79,13 +79,13 @@ public class App implements Testable
 
             // Get the JDBC driver name and version.
             DatabaseMetaData dbmd = _connection.getMetaData();
-            System.out.println( "Driver Name: " + dbmd.getDriverName() );
+            /*System.out.println( "Driver Name: " + dbmd.getDriverName() );
             System.out.println( "Driver Version: " + dbmd.getDriverVersion() );
 
             // Print some connection properties.
             System.out.println( "Default Row Prefetch Value is: " + _connection.getDefaultRowPrefetch() );
             System.out.println( "Database Username is: " + _connection.getUserName() );
-            System.out.println();
+            System.out.println();*/
 
             return "0";
         }
@@ -2222,9 +2222,9 @@ public class App implements Testable
         do
         {
             System.out.print("\nPlease Choose From the Following Options:"
-                    + "\n 1. Display Balance \n 2. Deposit"
-                    + "\n 3. Withdraw\n 4. Top Up\n 5.Purchase\n 6.Transfer"
-                    + "\n 7.Collect\n 8.Wire\n 9.Pay-Friend\n 10.Set Pin 11.\nLog Out\n\n");
+                    + "\n 1.Display Balance \n 2.Deposit"
+                    + "\n 3.Withdraw\n 4.Top Up\n 5.Purchase\n 6.Transfer"
+                    + "\n 7.Collect\n 8.Wire\n 9.Pay-Friend\n 10.Set Pin \n11.Log Out\n\n");
 
             menuChoice = scan.nextInt();
 
@@ -2330,7 +2330,7 @@ public class App implements Testable
                         String collecttoaccId = scan.next();
                         System.out.print("\nEnter Amount to Collect: ");
                         double collectAmt = scan.nextDouble();
-                        this.collect(collectfromaccId, collecttoaccId, collectAmt);
+                        this.collect(collecttoaccId, collectfromaccId, collectAmt);
                         System.out.println("Collect completed");
                         break;
                     case 8:

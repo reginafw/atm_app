@@ -37,8 +37,7 @@ public class Main
             System.out.println(app.topUp("502",100));
             System.out.println(app.payFriend("501","502",100));
             System.out.println(app.listClosedAccounts());*/
-            app.atmOrteller();
-            //app.createCustomerReport("207843218");
+            app.atmOrteller();;
 
 
 
