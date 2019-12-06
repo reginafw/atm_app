@@ -79,10 +79,20 @@ public class Main
             //app.dropTables();
             //app.createTables();
             //app.entryAvgBalance("002", 1000);
-            app.accrueInterest();
+           // app.accrueInterest();
             //System.out.println(app.getInterestRateFromType(AccountType.SAVINGS));
            // app.createCheckingSavingsAccount( AccountType.INTEREST_CHECKING, "006", 8000.00, "600", "Lizard", "123 Goleta" );
             //app.setInterestRate(AccountType.INTEREST_CHECKING,0.0025);
+            app.dropTables();
+            app.createTables();
+            app.populateTables();
+            //System.out.println(app.getAccountType("60413"));
+           // if(app.exists("43942","Account_Owns","Account"))
+               // System.out.println("true");
+            //app.createPocketAccount( "60413","43492", 20, "400651982", "Santa Cruz");
+            //System.out.println(app.getAccountType("67521"));
+
+           // app.generateDTER();
         }
     }
 
