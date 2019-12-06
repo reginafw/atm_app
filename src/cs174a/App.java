@@ -2016,156 +2016,6 @@ public class App implements Testable
         return number/25;
     }
 
-    int menu()
-    {
-        int menuChoice;
-        do
-        {
-            System.out.print(
-                     "\n 1. Display Balance \n 2. Deposit"
-                    + "\n 3. Withdraw\n 4. Top Up\n 5. Purchase\n 6. Transfer"
-                    + "\n 7. Collect\n 8. Wire\n 9. Pay-Friend\n 10. Log Out\n"
-                    +"\nPlease Choose An Option: ");
-
-            menuChoice = scan.nextInt();
-
-            if (menuChoice < 1 || menuChoice > 10){
-                System.out.println("error");
-            }
-
-        }while (menuChoice < 1 || menuChoice > 10);
-
-        return menuChoice;
-    }
-    void startAtm(){
-        try {
-            String r;
-
-
-            String tin, accountid;
-            int pin;
-            int count = 0, menuOption = 0;
-            double depositAmt = 0, withdrawAmt = 0, currentBal = 0;
-            boolean pinVerified = false;
-            //loop that will count the number of login attempts
-            //you make and will exit program if it is more than 3.
-            //as long as oriBal equals an error.
-            do {
-
-                System.out.println("Please Enter Your Tax ID: ");
-                tin = scan.next();
-
-                System.out.println("Enter Your PIN: ");
-                pin = scan.nextInt();
-
-                pinVerified = this.VerifyPin(pin, tin);
-
-                count++;
-
-                if (count >= 3 && pinVerified == false) {
-                    System.out.print("Maximum Login Attempts Reached.");
-                    System.exit(0);
-                }
-
-
-            } while (pinVerified == false);
-
-
-            //this loop will keep track of the options that
-            //the user inputs in for the menu. and will
-            //give the option of deposit, withdraw, or logout.
-
-
-            while (menuOption != 10) {
-                menuOption = this.menu();
-                switch (menuOption) {
-                    case 1:
-                        System.out.print("\nEnter Account ID: ");
-                        String id = scan.next();
-                        r = this.showBalance(id);
-                        System.out.println(r);
-                        break;
-                    case 2:
-                        System.out.print("\nEnter Account ID You Wish to Deposit to: ");
-                        String depositid = scan.next();
-                        System.out.print("\nEnter Amount You Wish to Deposit: ");
-                        depositAmt = scan.nextDouble();
-                        this.deposit(depositid, depositAmt);
-                        System.out.println("Deposit Completed");
-                        break;
-                    // case 3:
-                    //     System.out.print("\nEnter Amount You Wish to Withdrawl: ");
-                    //     double withdrawalAmt = scan.nextDouble();
-                    //     this.withdrawal(accountid, withdrawalAmt);
-                    //     break;
-                    case 4:
-                        System.out.print("\nEnter Pocket ID: ");
-                        String pocketid = scan.next();
-                        System.out.print("\nEnter Amount You Wish to Top-Up: ");
-                        double topUpAmt = scan.nextDouble();
-                        this.topUp(pocketid, topUpAmt);
-                        System.out.println("Top-Up Completed");
-
-                        break;
-                    // case 5:
-                    //     System.out.print("\nEnter Account ID");
-                    //     String accId = scan.next();
-                    //     System.out.print("\nEnter Amount to Purchase Item(s)");
-                    //     double purchaseAmt= scan.nextDouble();
-                    //     this.purchase(accId,purchaseAmt);
-                    //     break;
-                    case 6:
-                        System.out.print("\nEnter Account ID to Transfer From");
-                        String transferfromaccId = scan.next();
-                        System.out.print("\nEnter Account ID to Transfer To");
-                        String transfertoaccId = scan.next();
-                        System.out.print("\nEnter Amount");
-                        double transferAmt = scan.nextDouble();
-                        this.transfer(transferfromaccId, transfertoaccId, tin, transferAmt);
-                        System.out.println("Transfer Completed");
-                        break;
-                    case 7:
-                        System.out.print("\nEnter Main Account ID: ");
-                        String collectfromaccId = scan.next();
-                        System.out.print("\nEnter Pocket Account ID: ");
-                        String collecttoaccId = scan.next();
-                        System.out.print("\nEnter Amount to Collect: ");
-                        double collectAmt = scan.nextDouble();
-                        this.collect(collectfromaccId, collecttoaccId, collectAmt);
-                        System.out.println("Collect completed");
-                        break;
-                    case 8:
-                        System.out.print("\nEnter Account ID to Wire From");
-                        String wirefromaccId = scan.next();
-                        System.out.print("\nEnter Account ID to Wire To");
-                        String wiretoaccId = scan.next();
-                        System.out.print("\nEnter Amount");
-                        double wireAmt = scan.nextDouble();
-                        r = this.wire(wiretoaccId, wirefromaccId, wireAmt, tin);
-                        System.out.println(r);
-                        break;
-                    case 9:
-                        System.out.print("\nEnter Account ID to Pay Friend From");
-                        String pffromaccId = scan.next();
-                        System.out.print("\nEnter Friend's Account ID");
-                        String pftoaccId = scan.next();
-                        System.out.print("\nEnter Amount to Pay");
-                        double pfAmt = scan.nextDouble();
-                        r = this.payFriend(pffromaccId, pftoaccId, pfAmt);
-                        System.out.println("Pay-friend Completed");
-                        break;
-
-
-                    case 10:
-                        System.out.print("\nThank For Using My ATM.  Have a Nice Day.  Good-Bye!");
-                        System.exit(0);
-                        break;
-                }
-            }
-        } catch (Exception e) {
-            System.err.println( e.getMessage() );
-        }
-    }
 
     public void accountUtility(AccountType accountType, String id, double initialBalance, String tin, String branch){
         String createAccount = "INSERT INTO Account_Owns(aid, branch, acc_type, balance, interest_rate, interest, taxid)"+
@@ -2364,25 +2214,182 @@ public class App implements Testable
         }
     }
 
+
+
+    int menu()
+    {
+        int menuChoice;
+        do
+        {
+            System.out.print("\nPlease Choose From the Following Options:"
+                    + "\n 1. Display Balance \n 2. Deposit"
+                    + "\n 3. Withdraw\n 4. Top Up\n 5.Purchase\n 6.Transfer"
+                    + "\n 7.Collect\n 8.Wire\n 9.Pay-Friend\n 10.Set Pin 11.\nLog Out\n\n");
+
+            menuChoice = scan.nextInt();
+
+            if (menuChoice < 1 || menuChoice > 11){
+                System.out.println("error");
+            }
+
+        }while (menuChoice < 1 || menuChoice > 11);
+
+        return menuChoice;
+    }
+    void startAtm(){
+        try {
+            String r;
+
+
+            String tin, accountid;
+            int pin;
+            int count = 0, menuOption = 0;
+            double depositAmt = 0, withdrawAmt = 0, currentBal = 0;
+            boolean pinVerified = false;
+
+            do {
+
+                System.out.println("Please Enter Your Tax ID: ");
+                tin = scan.next();
+
+                System.out.println("Enter Your PIN: ");
+                pin = scan.nextInt();
+
+                pinVerified = this.VerifyPin(pin, tin);
+
+                count++;
+
+                if (count >= 3 && pinVerified == false) {
+                    System.out.print("Maximum Login Attempts Reached.");
+                    System.exit(0);
+                }
+
+
+            } while (pinVerified == false);
+
+
+            //this loop will keep track of the options that
+            //the user inputs in for the menu. and will
+            //give the option of deposit, withdraw, or logout.
+
+
+            while (menuOption != 11) {
+                menuOption = this.menu();
+                switch (menuOption) {
+                    case 1:
+                        System.out.print("\nEnter Account ID: ");
+                        String id = scan.next();
+                        r = this.showBalance(id);
+                        System.out.println(r);
+                        break;
+                    case 2:
+                        System.out.print("\nEnter Account ID You Wish to Deposit to: ");
+                        String depositid = scan.next();
+                        System.out.print("\nEnter Amount You Wish to Deposit: ");
+                        depositAmt = scan.nextDouble();
+                        this.deposit(depositid, depositAmt);
+                        System.out.println("Deposit Completed");
+                        break;
+                    case 3:
+                        System.out.print("\nEnter Account ID You Wish to Withdraw From: ");
+                        String accountidw= scan.next();
+                        System.out.print("\nEnter Amount You Wish to Withdrawl: ");
+                        double withdrawalAmt = scan.nextDouble();
+                        this.withdrawal(accountidw, withdrawalAmt);
+                        break;
+                    case 4:
+                        System.out.print("\nEnter Pocket ID: ");
+                        String pocketid = scan.next();
+                        System.out.print("\nEnter Amount You Wish to Top-Up: ");
+                        double topUpAmt = scan.nextDouble();
+                        this.topUp(pocketid, topUpAmt);
+                        System.out.println("Top-Up Completed");
+
+                        break;
+                    case 5:
+                        System.out.print("\nEnter Account ID: ");
+                        String accId = scan.next();
+                        System.out.print("\nEnter Amount to Purchase Item(s): ");
+                        double purchaseAmt= scan.nextDouble();
+                        this.purchase(accId,purchaseAmt);
+                        break;
+                    case 6:
+                        System.out.print("\nEnter Account ID to Transfer From: ");
+                        String transferfromaccId = scan.next();
+                        System.out.print("\nEnter Account ID to Transfer To: ");
+                        String transfertoaccId = scan.next();
+                        System.out.print("\nEnter Amount: ");
+                        double transferAmt = scan.nextDouble();
+                        this.transfer(transferfromaccId, transfertoaccId, tin, transferAmt);
+                        System.out.println("Transfer Completed");
+                        break;
+                    case 7:
+                        System.out.print("\nEnter Main Account ID: ");
+                        String collectfromaccId = scan.next();
+                        System.out.print("\nEnter Pocket Account ID: ");
+                        String collecttoaccId = scan.next();
+                        System.out.print("\nEnter Amount to Collect: ");
+                        double collectAmt = scan.nextDouble();
+                        this.collect(collectfromaccId, collecttoaccId, collectAmt);
+                        System.out.println("Collect completed");
+                        break;
+                    case 8:
+                        System.out.print("\nEnter Account ID to Wire From: ");
+                        String wirefromaccId = scan.next();
+                        System.out.print("\nEnter Account ID to Wire To: ");
+                        String wiretoaccId = scan.next();
+                        System.out.print("\nEnter Amount: ");
+                        double wireAmt = scan.nextDouble();
+                        r = this.wire(wiretoaccId, wirefromaccId, wireAmt, tin);
+                        System.out.println(r);
+                        break;
+                    case 9:
+                        System.out.print("\nEnter Account ID to Pay Friend From: ");
+                        String pffromaccId = scan.next();
+                        System.out.print("\nEnter Friend's Account ID: ");
+                        String pftoaccId = scan.next();
+                        System.out.print("\nEnter Amount to Pay: ");
+                        double pfAmt = scan.nextDouble();
+                        r = this.payFriend(pffromaccId, pftoaccId, pfAmt);
+                        System.out.println("Pay-friend Completed");
+                        break;
+                    case 10:
+                        System.out.print("\nEnter Account New PIN: ");
+                        int newpin=scan.nextInt();
+                        int oldpin=this.Encrypt(pin);
+                        r=this.SetPin(tin,oldpin,newpin);
+                        System.out.println(r);
+
+
+                    case 11:
+                        System.out.print("\nThank For Using My ATM.  Have a Nice Day.  Good-Bye!");
+                        System.exit(0);
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println( e.getMessage() );
+        }
+    }
+
     public int menu2()
     {
 
         int menuChoice;
         do
         {
-            System.out.print(
-                    "\n 1. Enter Check Transaction \n 2. Generate Monthly Statement"
-                    + "\n 3. List Closed Accounts\n 4. Generate Government Drug and Tax Evasion Report (DTER)\n 5. Customer Report\n 6. Add Interest"
-                    + "\n 7. Create Account\n 8. Delete Closed Accounts and Customers\n 9. Delete Transactions:\n10. Set Date \n11. Set Interest Rate \n12. Log Out\n"
-                    +"\nPlease Choose From the Following Options: ");
+            System.out.print("\nPlease Choose From the Following Options:"
+                    + "\n 1.Enter Check Transaction \n 2.Generate Monthly Statement"
+                    + "\n 3.List Closed Accounts\n 4.Generate Government Drug and Tax Evasion Report (DTER)\n 5.Customer Report\n 6.Add Interest"
+                    + "\n 7.Create Account\n 8.Delete Closed Accounts and Customers\n 9.Delete Transactions\n 10.Set Date\n 11.Set Interest\n 12.Accrue Interest\n 13.Set Interest Rate\n 14.Log Out\n\n");
 
             menuChoice = scan.nextInt();
 
-            if (menuChoice < 1 || menuChoice > 10){
+            if (menuChoice < 1 || menuChoice > 14){
                 System.out.println("error");
             }
 
-        }while (menuChoice < 1 || menuChoice > 10);
+        }while (menuChoice < 1 || menuChoice > 14);
 
         return menuChoice;
     }
@@ -2396,7 +2403,7 @@ public class App implements Testable
 
 
 
-        while (menuOption != 10)
+        while (menuOption != 14)
         {
             menuOption=this.menu2();
             switch (menuOption)
@@ -2413,7 +2420,7 @@ public class App implements Testable
                     System.out.println(r);
                     break;
                 case 2:
-                    System.out.print("\nEnter Tax ID ");
+                    System.out.print("\nEnter Tax ID:  ");
                     String taxid1= scan.next();
 
                     this.generateMonthlyStatement(taxid1);
@@ -2435,8 +2442,11 @@ public class App implements Testable
 
                     break;
                 case 6:
-
-                    System.out.println("1");
+                    System.out.print("\nEnter Account ID: ");
+                    String intrstaccid = scan.next();
+                    System.out.print("\nEnter Ineterst to be Added: ");
+                    double addedinterest = scan.nextDouble();
+                    this.addInterest(intrstaccid,addedinterest);
                     break;
                 case 7:
                     System.out.print("\n1.Interest \n2.Student \n3.Saving \n4.Pocket \n");
@@ -2469,11 +2479,11 @@ public class App implements Testable
                     break;
                 case 8:
                     this.deleteClosedAccounts();
-                    System.out.println(r);
+
                     break;
                 case 9:
                     this.deleteTransactions();
-                    System.out.println(r);
+
                     break;
                 case 10:
                     System.out.print("\nEnter year: ");
@@ -2485,9 +2495,9 @@ public class App implements Testable
                     this.setDate(year,month,day);
                     break;
                 case 11:
-                    System.out.println("\nEnter Account Type: ");
+                    System.out.println("\n Enter Account Type: ");
                     String acc_type=scan.next();
-                    System.out.println("\nEnter New Monthly Interest Rate: ");
+                    System.out.println("\n Enter New Monthly Interest Rate: ");
                     double rate=scan.nextDouble();
                     if(acc_type.equals("Interest_Checking"))
                         this.setInterestRate(AccountType.INTEREST_CHECKING,rate);
@@ -2500,13 +2510,34 @@ public class App implements Testable
                     else
                         System.out.println("Sorry, invalid account type");
                     break;
+
                 case 12:
-                    System.out.print("\nHave a Nice Day.  Good-Bye!");
+                    this.accrueInterest();
+                    break;
+                case 13:
+                    System.out.println("\nEnter Account Type: ");
+                    String acc_type1=scan.next();
+                    System.out.println("\nEnter New Monthly Interest Rate: ");
+                    double irate=scan.nextDouble();
+                    if(acc_type1.equals("Interest_Checking"))
+                        this.setInterestRate(AccountType.INTEREST_CHECKING,irate);
+                    else if(acc_type1.equals("Savings"))
+                        this.setInterestRate(AccountType.SAVINGS,irate);
+                    else if(acc_type1.equals("Student_Checking"))
+                        this.setInterestRate(AccountType.STUDENT_CHECKING,irate);
+                    else if(acc_type1.equals("Pocket"))
+                        this.setInterestRate(AccountType.POCKET,irate);
+                    else
+                        System.out.println("Sorry, invalid account type");
+                    break;
+                case 14:
+                    System.out.print("\nHave a Nice Day.  Good-Bye!\n");
                     System.exit(0);
                     break;
             }
         }
     }
+
     public void atmOrteller(){
         int choice = 0;
         while (choice !=1 && choice!=2){
@@ -2524,7 +2555,6 @@ public class App implements Testable
 
         }
     }
-
 
 }
 
